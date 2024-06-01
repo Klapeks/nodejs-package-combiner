@@ -1,0 +1,28 @@
+{
+    "name": "@klapeks/nodejs-package-combiner",
+    "description": "Combine all package.json into one",
+    "version": "0.0.1",
+    "type": "commonjs",
+    "author": "Klapeks",
+    "license": "ISC",
+    "keywords": [],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Klapeks/nodejs-package-combiner"
+    },
+    "nodemonConfig": {
+        "ignore": [ "dist" ]
+    },
+    "bin": {
+        "combine-packages": "cli.js"
+    },
+    "scripts": {
+        "dev": "nodemon --exec npm run test --ext ts,js",
+        "test": "tsc && npx combine-packages /Users/klapeks/Codes/Restiki/micro-services/package.json test/combined-package.json"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^18.11.18",
+        "typescript": "^4.7.4"
+    }
+}
