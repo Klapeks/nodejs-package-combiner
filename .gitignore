@@ -2,3 +2,4 @@
 node_modules
 dist
 test/combined-package.json
+test/test.sh

@@ -1,6 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 
+interface PackageCombinerOptions {
+    ignore: string[]
+}
+
 function sortKeys(json: any) {
     let newJson = {} as any;
     Object.keys(json).sort().forEach(key => {
@@ -25,16 +29,20 @@ function mergeDependencies(originalDepend: any, newDepend: any) {
     }
 }
 
-async function readFolder(folder: string, packageJson: any, ignoreFirst: boolean) {
+async function readFolder(folder: string, packageJson: any, options: PackageCombinerOptions, ignoreFirst: boolean) {
     let folders = fs.readdirSync(folder);
     let fp = '';
     let localPackage = {} as any;
     for (let f of folders) {
+        if (options.ignore.includes(f)) {
+            console.log("Ignoring folder:", f);
+            continue;
+        }
         fp = path.join(folder, f);
         if (f[0] == '.') continue;
         if (f == 'node_modules') continue;
         if (fs.statSync(fp).isDirectory()) {
-            await readFolder(fp, packageJson, false);
+            await readFolder(fp, packageJson, options, false);
             continue;
         }
         if (!ignoreFirst && f == 'package.json') {
@@ -62,6 +70,7 @@ export async function combine(from: string, to: string) {
         "version": "0.0.0"
     } as any;
 
+
     if (!fs.existsSync(to)) {
         fs.mkdirSync(path.dirname(to), { recursive: true });
     }
@@ -73,11 +82,18 @@ export async function combine(from: string, to: string) {
         from = path.dirname(from);
     }
     else packageJson = JSON.parse(fs.readFileSync(to).toString())
+
+    let options: PackageCombinerOptions = {
+        ignore: []
+    }
     console.log("Package JSON Before", packageJson, '\n');
+    if (packageJson['nodejs-package-combiner']) {
+        options = packageJson['nodejs-package-combiner'];
+    }
 
     if (from.endsWith('.json')) from = path.dirname(from);
 
-    await readFolder(from, packageJson, true);
+    await readFolder(from, packageJson, options, false);
     console.log("Saving...")
     fs.writeFileSync(to, JSON.stringify(packageJson, undefined, 4));
     console.log("Done");
